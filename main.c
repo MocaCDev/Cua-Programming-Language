@@ -6,6 +6,7 @@
 #include "src/parser.h"
 
 // RUN COMMAND: ./main.o examples/example.cua
+// CUA's programming language source code can now be found on GitHub. Let me know if you need me to publish it on another website!
 
 int main(int argc, char* args[]) {
 

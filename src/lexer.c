@@ -34,9 +34,8 @@ TOKEN_S* next_token(LEXER_* lexer) {
             advance(lexer);
             if(lexer->current_char=='-') {
                 gather_comment(lexer);
-                continue;
             } else {
-                fprintf(stderr,"\nWas expecting single line comment on line %d\n\n",lexer->line);
+                fprintf(stderr,"\nExpecting single line comment, '--', found '-'.\n\n");
                 fflush(stderr);
                 exit(EXIT_FAILURE);
             }
@@ -68,7 +67,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
 // Gets the next character as long as the next character isn't '\0'
 void gather_comment(LEXER_* lexer) {
     while(1) {
-        advance(lexer);\
+        advance(lexer);
 
         if(lexer->current_char == '\n') {
             return advance(lexer);
