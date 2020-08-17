@@ -79,6 +79,7 @@ static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
 }
 static inline void get_variable_name(LEXER_* lexer) {
     lexer->variable_name = gather_string(lexer,0);
+    lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
 }
 // Gets the next ideal 'token'. This is dependable upon the switch statement(could be a character, could be multiple characters, could be a symbol etc). This is used heavily in parser.c
 TOKEN_S* next_token(LEXER_* lexer) {
@@ -103,7 +104,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
             advance(lexer);
             // Should be variable name..
             get_variable_name(lexer);
-            printf("%s",lexer->variable_name);
+            printf("Variable Name: %s\n%d\n",lexer->variable_name,lexer->tokens->TOKEN_TYPE);
         }
         
         if(lexer->current_char=='-') {
