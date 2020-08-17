@@ -3,8 +3,8 @@
 #include "tokens.h"
 
 typedef struct Lexer {
-    char* type;
     char* contents;
+    char* variable_name;
     unsigned int i; // this will be the current character we are on
     unsigned int line;
     char current_char;
@@ -19,7 +19,5 @@ TOKEN_S* gather_id(LEXER_* lexer);
 void advance(LEXER_* lexer);
 void skip_whitespace(LEXER_* lexer);
 char* get_char_as_string(LEXER_* lexer);
-void gather_comment(LEXER_* lexer);
-void gather_multi_line_comment(LEXER_* lexer);
 
 #endif

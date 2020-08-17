@@ -21,14 +21,90 @@ LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
 
     return lexer;
 }
+static inline void gather_comment(LEXER_* lexer) {
+    while(1) {
+        advance(lexer);
+
+        if(lexer->current_char == '\n') {
+            return advance(lexer);
+        }
+    }
+}
+static inline void gather_multi_line_comment(LEXER_* lexer) {
+    while(1) {
+        advance(lexer);
+        
+        if(lexer->current_char == '-') {
+            advance(lexer);
+            if(lexer->current_char == '/') {
+                advance(lexer);
+                if(lexer->current_char == '\n') {
+                    return advance(lexer);
+                }
+            } else {
+                fprintf(stderr,"\nWas expecting end of multi line comment on line %d\n\n",lexer->line);
+                fflush(stderr);
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+}
+static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
+    char* value = calloc(1,sizeof(char));
+
+    while(isalnum(lexer->current_char)) {
+        char* current = get_char_as_string(lexer);
+
+        value = realloc(
+            value,
+            strlen(current)*sizeof(char)
+        );
+
+        strcat(value,current);
+        advance(lexer);
+    }
+    
+    /*
+        We are going to tokenize keywords in the lexer.
+        This function, gather_id, will get the keyword, and we will then store it in the lexer struct
+        so that we can then tokenize them!
+    */
+    if(assign_to_variable_name == 1) lexer->tokens = init_token(TOKEN_ID, value);
+
+    if(assign_to_variable_name==0) {
+        lexer->variable_name = value; 
+        return lexer->variable_name;
+    }
+    return lexer;
+}
+static inline void get_variable_name(LEXER_* lexer) {
+    lexer->variable_name = gather_string(lexer,0);
+}
 // Gets the next ideal 'token'. This is dependable upon the switch statement(could be a character, could be multiple characters, could be a symbol etc). This is used heavily in parser.c
 TOKEN_S* next_token(LEXER_* lexer) {
     while(lexer->current_char != '\0' && lexer->i < strlen(lexer->contents)) {
+        REDO:
         if(lexer->current_char == ' ' || lexer->current_char == 10)
             skip_whitespace(lexer);
         
-        if(isalnum(lexer->current_char))
-            return gather_id(lexer);
+        if(isalnum(lexer->current_char)) {
+            gather_id(lexer);
+        }
+
+        if(strcmp(lexer->tokens->value,"local")==0) {
+            lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
+
+            advance(lexer);
+            goto REDO;
+        }
+        if(strcmp(lexer->tokens->value,"int")==0) {
+            lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
+
+            advance(lexer);
+            // Should be variable name..
+            get_variable_name(lexer);
+            printf("%s",lexer->variable_name);
+        }
         
         if(lexer->current_char=='-') {
             advance(lexer);
@@ -39,57 +115,29 @@ TOKEN_S* next_token(LEXER_* lexer) {
                 fflush(stderr);
                 exit(EXIT_FAILURE);
             }
-            continue;
         }
         if(lexer->current_char == '/') {
             advance(lexer);
             if(lexer->current_char == '-') {
                 gather_multi_line_comment(lexer);
-                continue;
             } else {
                 fprintf(stderr, "\nWas expecting multi-line comment on line %d.\n\n",lexer->line);
                 fflush(stderr);
                 exit(EXIT_FAILURE);
             }
-            continue;
         }
-        
+
+        SWITCH:
         switch(lexer->current_char) {
-            case '=': return advance_with_token(lexer,init_token(TOKEN_EQUALS));
-            case '\0': return advance_with_token(lexer,init_token(TOKEN_EOF));
+            case '=': return advance_with_token(lexer,init_token(TOKEN_EQUALS,get_char_as_string(lexer)));
         }
     }
 
-    return init_token(TOKEN_EOF); // guess the end of the file has been reached
+    return init_token(TOKEN_EOF,""); // guess the end of the file has been reached
 }
 //LEXER_* gather_type(LEXER_* lexer, int type_id) {
 //}
 // Gets the next character as long as the next character isn't '\0'
-void gather_comment(LEXER_* lexer) {
-    while(1) {
-        advance(lexer);
-
-        if(lexer->current_char == '\n') {
-            return advance(lexer);
-        }
-    }
-}
-void gather_multi_line_comment(LEXER_* lexer) {
-    while(1) {
-        advance(lexer);
-        
-        if(lexer->current_char == '-') {
-            advance(lexer);
-            if(lexer->current_char == '/') {
-                return advance(lexer);
-            } else {
-                fprintf(stderr,"\nWas expecting end of multi line comment on line %d\n\n",lexer->line);
-                fflush(stderr);
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
-}
 void advance(LEXER_* lexer) {
     if(!(lexer->i >= strlen(lexer->contents) || lexer->current_char == '\0')) {
         lexer->i++;
@@ -115,25 +163,35 @@ void skip_whitespace(LEXER_* lexer) {
 // This 'tokenizes' the recently found token, using init_token. TOKEN_TYPE is then set to the token found in the switch statement in next_token
 TOKEN_S* advance_with_token(LEXER_* lexer, TOKEN_S* tokens) {
     advance(lexer);
+    lexer->tokens = tokens;
     return tokens;
 }
 // I kinda just copied this from what I did with my language. This, to me, is the easiest way to do this
 TOKEN_S* gather_id(LEXER_* lexer) {
-    char* value = malloc(sizeof(value));
+    //char* value = calloc(1,sizeof(char));
 
-    while(isalnum(lexer->current_char)) {
-        char* current = get_char_as_string(lexer);
+    //while(isalnum(lexer->current_char)) {
+        //char* current = get_char_as_string(lexer);
 
-        value = realloc(
-            value,
-            strlen(current)*sizeof(char)
-        );
+        //value = realloc(
+            //value,
+            //strlen(current)*sizeof(char)
+        //);
 
-        strcat(value,current);
-        advance(lexer);
-    }
+        //strcat(value,current);
+        //advance(lexer);
+    //}
+    
+    /*
+        We are going to tokenize keywords in the lexer.
+        This function, gather_id, will get the keyword, and we will then store it in the lexer struct
+        so that we can then tokenize them!
+    */
+    //lexer->tokens = init_token(TOKEN_ID, value);
 
-    return init_token(TOKEN_ID);
+    gather_string(lexer,1);
+
+    return lexer->tokens;
 }
 char* get_char_as_string(LEXER_* lexer) {
     char* string = calloc(2,sizeof(char));
