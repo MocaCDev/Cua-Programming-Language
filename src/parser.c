@@ -10,5 +10,7 @@ parser* init_parser(LEXER_* lexer) {
     parser->current_token = next_token(lexer);
     parser->last_token = parser->current_token;
 
+    printf("%s",parser->lexer->variable_name);
+
     return parser;
 }

@@ -1,5 +1,6 @@
 #ifndef PARSER
 #define PARSER
+#include "tokens.h"
 #include "lexer.h"
 
 typedef struct PARSER_ {
@@ -8,6 +9,7 @@ typedef struct PARSER_ {
     TOKEN_S* last_token;
 } parser;
 
-parser* init_parser();
+parser* init_parser(LEXER_* lexer);
+parser* local_variable_definition(LEXER_* lexer, int token);
 
 #endif

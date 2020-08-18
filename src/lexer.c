@@ -7,7 +7,7 @@
 
 // sets up LEXER_ struct
 LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
-    LEXER_* lexer = calloc(1,sizeof(LEXER_*));
+    LEXER_* lexer = calloc(1,sizeof(LEXER_));
 
     lexer->i = 0;
     lexer->contents = contents;
@@ -96,7 +96,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
             lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
 
             advance(lexer);
-            goto REDO;
+            return lexer->tokens;
         }
         if(strcmp(lexer->tokens->value,"int")==0) {
             lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
@@ -104,7 +104,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
             advance(lexer);
             // Should be variable name..
             get_variable_name(lexer);
-            printf("Variable Name: %s\n%d\n",lexer->variable_name,lexer->tokens->TOKEN_TYPE);
+            return lexer->tokens;
         }
         
         if(lexer->current_char=='-') {
@@ -146,6 +146,10 @@ void advance(LEXER_* lexer) {
 
         if(lexer->current_char == '\n')
             lexer->line++;
+        
+        if(lexer->current_char == '_') {
+            advance(lexer);
+        }
     }
 }
 // Skips whitespace. Example, if we had "int   a   =   10;" all the whitespace would be skipped
