@@ -147,6 +147,14 @@ void advance(LEXER_* lexer) {
         if(lexer->current_char == '\n')
             lexer->line++;
         
+        /*
+            For some reason, '_' will cut off variable name.
+            So, to merge the varibale name together, we will just emediately get the next character that follows '_'
+            so we don't run into errors.
+            So, if we had:
+                local int my_age;
+            my_age will then be: myage because the '_' indicates we want to merge
+        */
         if(lexer->current_char == '_') {
             advance(lexer);
         }
