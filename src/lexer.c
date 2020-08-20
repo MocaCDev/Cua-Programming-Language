@@ -12,6 +12,7 @@ LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
     lexer->i = 0;
     lexer->contents = contents;
     lexer->line = 1;
+    lexer->is_local_variable = 1; // 1 as in false. No local variable declaration found yet
 
     // Setting up TOKEN_S struct in the lexer struct
     lexer->tokens = malloc(sizeof(tokens)); // we had to allocate the size of the the tokens argument(declared in main.c)  
@@ -77,35 +78,15 @@ static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
     }
     return lexer;
 }
-static inline void get_variable_name(LEXER_* lexer) {
+void get_variable_name(LEXER_* lexer) {
     lexer->variable_name = gather_string(lexer,0);
     lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
 }
 // Gets the next ideal 'token'. This is dependable upon the switch statement(could be a character, could be multiple characters, could be a symbol etc). This is used heavily in parser.c
 TOKEN_S* next_token(LEXER_* lexer) {
     while(lexer->current_char != '\0' && lexer->i < strlen(lexer->contents)) {
-        REDO:
         if(lexer->current_char == ' ' || lexer->current_char == 10)
             skip_whitespace(lexer);
-        
-        if(isalnum(lexer->current_char)) {
-            gather_id(lexer);
-        }
-
-        if(strcmp(lexer->tokens->value,"local")==0) {
-            lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
-
-            advance(lexer);
-            return lexer->tokens;
-        }
-        if(strcmp(lexer->tokens->value,"int")==0) {
-            lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
-
-            advance(lexer);
-            // Should be variable name..
-            get_variable_name(lexer);
-            return lexer->tokens;
-        }
         
         if(lexer->current_char=='-') {
             advance(lexer);
@@ -127,14 +108,35 @@ TOKEN_S* next_token(LEXER_* lexer) {
                 exit(EXIT_FAILURE);
             }
         }
+        
+        if(isalnum(lexer->current_char)) {
+            gather_id(lexer);
+        }
 
-        SWITCH:
+        if(strcmp(lexer->tokens->value,"local")==0) {
+            lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
+            lexer->is_local_variable = 0;
+
+            advance(lexer);
+            return lexer->tokens;
+        }
+        if(strcmp(lexer->tokens->value,"int")==0) {
+            lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
+
+            advance(lexer);
+            /*
+            // Should be variable name..
+            get_variable_name(lexer);
+            */
+            return lexer->tokens;
+        }
+        
         switch(lexer->current_char) {
             case '=': return advance_with_token(lexer,init_token(TOKEN_EQUALS,get_char_as_string(lexer)));
         }
     }
 
-    return init_token(TOKEN_EOF,""); // guess the end of the file has been reached
+    return init_token(TOKEN_EOF,"\0"); // guess the end of the file has been reached
 }
 //LEXER_* gather_type(LEXER_* lexer, int type_id) {
 //}

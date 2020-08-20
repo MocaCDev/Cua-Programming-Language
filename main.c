@@ -12,12 +12,20 @@
 
 int main(int argc, char* args[]) {
 
+    if(argc < 2) {
+        fprintf(stderr,"\nError: CUA's compiler expects the following command:\n./main.o <filename>\n\n");
+        fflush(stderr);
+        exit(EXIT_FAILURE);
+    }
+
     TOKEN_S* tokens = calloc(1,sizeof(TOKEN_S*));
     LEXER_* lexer = init_lexer(
         read_file(args[1]),
         tokens
     );
     parser* parser = init_parser(lexer);
+
+    void* b = (int*)10;
 
     return 0;
 }

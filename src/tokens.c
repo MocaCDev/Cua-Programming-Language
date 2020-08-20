@@ -9,7 +9,6 @@ TOKEN_S* init_token(int type, char* value) {
 
     token->TOKEN_TYPE = type;
     token->value = value;
-    token->is_keyword = 1;
 
     return token;
 }

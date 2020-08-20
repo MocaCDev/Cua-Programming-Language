@@ -1,1 +1,10 @@
+/-
+    Booleans will be different in CUA.
+    I want a boolean to be lower level.
+
+    Booleans won't just prove 'true' or 'false' in our language, it will work with low level bit operations.
+    In CUA, I want to add a keyword 'bit' for low level working with bits.
+    With the keyword 'bit', you can then assign a boolean value.
+    I will make it to where our runtime turns that 'boolean' into a true or false mechanism.
+-/
 local int my_age

@@ -7,6 +7,7 @@ typedef struct Lexer {
     char* variable_name;
     unsigned int i; // this will be the current character we are on
     unsigned int line;
+    unsigned int is_local_variable; // this will be set to 0(true) if the "local" variable was found
     char current_char;
     TOKEN_S* tokens;
 } LEXER_;
@@ -19,5 +20,6 @@ TOKEN_S* gather_id(LEXER_* lexer);
 void advance(LEXER_* lexer);
 void skip_whitespace(LEXER_* lexer);
 char* get_char_as_string(LEXER_* lexer);
+void get_variable_name(LEXER_* lexer);
 
 #endif
