@@ -1,5 +1,5 @@
 <LOCAL_VARIABLE_DEF>
-local > "local" + <VARIABLE_TYPE> + <VARIABLE_NAME> = <VARIABLE_VALUE>
+local > "local" + <VARIABLE_TYPE>"int"|"char"|"bit"|"string"|"float" + <VARIABLE_NAME> = <VARIABLE_VALUE>
 
 <VARIABLE_DEF>
 <VARIABLE_TYPE> + <VARIABLE_NAME> = <VARIABLE_VALUE>
