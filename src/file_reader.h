@@ -9,6 +9,6 @@ typedef struct FILE_BUFFER {
 
 char* read_file(const char* file_to_read);
 
-#define ASSERT_FILE_BUFFER_SIZE(size, match) ( ((size & match) < size) ? 0 : 1 )
+#define ASSERT_FILE_BUFFER_SIZE(size, match) ( (((f_b->ammount_of_character|f_b->buffer_size)&f_b->ammount_of_character) == size) ? 0 : 1 )
 
 #endif
