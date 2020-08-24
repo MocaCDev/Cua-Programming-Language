@@ -8,7 +8,7 @@
 */
 
 parser* init_parser(LEXER_* lexer) {
-    parser* parser = calloc(1,sizeof(parser));
+    parser* parser = calloc(1,sizeof(*parser));
 
     parser->lexer = lexer;
     parser->token = next_token(lexer);
@@ -16,6 +16,7 @@ parser* init_parser(LEXER_* lexer) {
 
     return parser;
 }
+
 // Gathers the next token for the parser
 static inline void parser_gather_nexer_token(parser* parser_, int token_id) {
     if(parser_->token->TOKEN_TYPE == token_id) {

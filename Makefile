@@ -1,14 +1,7 @@
-.PHONY: all
-.PHONY: clean
 .PHONY: main.c
 
-all: main.c src/lexer.c
-
 main.c:
-	gcc -Wall -o main.o main.c  src/file_reader.c src/lexer.c src/parser.c src/tokens.c
+	gcc -Wall -o main.o main.c src/lexer.c src/parser.c src/file_reader.c src/runtime.c src/tokens.c src/function_shortcuts.h
 
-run: main.c  src/file_reader.c src/lexer.c src/parser.c src/tokens.c
+run: main.c src/lexer.c src/parser.c src/file_reader.c src/runtime.c src/tokens.c src/function_shortcuts.h
 	./main.o
-
-clean:
-	-rm *.o

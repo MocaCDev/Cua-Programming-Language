@@ -7,7 +7,7 @@
 
 // sets up LEXER_ struct
 LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
-    LEXER_* lexer = calloc(1,sizeof(LEXER_));
+    LEXER_* lexer = calloc(1,sizeof(*lexer));
 
     lexer->i = 0;
     lexer->contents = contents;
@@ -15,13 +15,14 @@ LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
     lexer->is_local_variable = 1; // 1 as in false. No local variable declaration found yet
 
     // Setting up TOKEN_S struct in the lexer struct
-    lexer->tokens = malloc(sizeof(tokens)); // we had to allocate the size of the the tokens argument(declared in main.c)  
+    //lexer->tokens = malloc(sizeof(*tokens)); // we had to allocate the size of the the tokens argument(declared in main.c)  
     lexer->tokens = tokens;
 
     lexer->current_char = lexer->contents[lexer->i];
 
     return lexer;
 }
+
 static inline void gather_comment(LEXER_* lexer) {
     while(1) {
         advance(lexer);
@@ -31,6 +32,7 @@ static inline void gather_comment(LEXER_* lexer) {
         }
     }
 }
+
 static inline void gather_multi_line_comment(LEXER_* lexer) {
     while(1) {
         advance(lexer);
@@ -50,6 +52,7 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
         }
     }
 }
+
 static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
     char* value = calloc(1,sizeof(char));
 
@@ -58,7 +61,7 @@ static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
 
         value = realloc(
             value,
-            strlen(current)*sizeof(char)
+            strlen(current)*sizeof(char*)
         );
 
         strcat(value,current);
@@ -78,10 +81,12 @@ static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
     }
     return lexer;
 }
+
 void get_variable_name(LEXER_* lexer) {
     lexer->variable_name = gather_string(lexer,0);
     lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
 }
+
 // Gets the next ideal 'token'. This is dependable upon the switch statement(could be a character, could be multiple characters, could be a symbol etc). This is used heavily in parser.c
 TOKEN_S* next_token(LEXER_* lexer) {
     while(lexer->current_char != '\0' && lexer->i < strlen(lexer->contents)) {
@@ -138,6 +143,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
 
     return init_token(TOKEN_EOF,"\0"); // guess the end of the file has been reached
 }
+
 //LEXER_* gather_type(LEXER_* lexer, int type_id) {
 //}
 // Gets the next character as long as the next character isn't '\0'
@@ -162,6 +168,7 @@ void advance(LEXER_* lexer) {
         }
     }
 }
+
 // Skips whitespace. Example, if we had "int   a   =   10;" all the whitespace would be skipped
 void skip_whitespace(LEXER_* lexer) {
     static int i = 0;
@@ -175,12 +182,14 @@ void skip_whitespace(LEXER_* lexer) {
         i = 0;
     }
 }
+
 // This 'tokenizes' the recently found token, using init_token. TOKEN_TYPE is then set to the token found in the switch statement in next_token
 TOKEN_S* advance_with_token(LEXER_* lexer, TOKEN_S* tokens) {
     advance(lexer);
     lexer->tokens = tokens;
     return tokens;
 }
+
 // I kinda just copied this from what I did with my language. This, to me, is the easiest way to do this
 TOKEN_S* gather_id(LEXER_* lexer) {
     //char* value = calloc(1,sizeof(char));
