@@ -18,7 +18,7 @@ parser* init_parser(LEXER_* lexer) {
 }
 
 // Gathers the next token for the parser
-static inline void parser_gather_nexer_token(parser* parser_, int token_id) {
+static inline void parser_gather_next_token(parser* parser_, int token_id) {
     if(parser_->token->TOKEN_TYPE == token_id) {
         parser_->last_token = parser_->token;
         parser_->token = next_token(parser_->lexer);

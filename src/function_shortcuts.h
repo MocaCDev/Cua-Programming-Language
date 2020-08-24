@@ -4,6 +4,4 @@
 #include "parser.h"
 #include "tokens.h"
 
-/* SHORTCUTS FOR FUNCTION CALLS */
-
 #endif

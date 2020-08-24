@@ -3,6 +3,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+static file_buffer* buffer_file_size(size_t size) {
+    file_buffer* f_b = calloc(1,sizeof(*f_b));
+
+    f_b->buffer_size = size*8;
+    f_b->ammount_of_character = size;
+
+    return f_b;
+}
+
 char* read_file(const char* file_to_read) {
     char* buffer = 0;
     long length;
@@ -36,14 +45,22 @@ char* read_file(const char* file_to_read) {
 
         fseek(file, 0, SEEK_END);
         length = ftell(file);
+        file_buffer* f_b = buffer_file_size(length);
         fseek(file, 0, SEEK_SET);
 
-        buffer = calloc(length, length);
-        if(buffer) {
-            fread(buffer,1,length,file);
+        if(ASSERT_FILE_BUFFER_SIZE(f_b->ammount_of_character, f_b->buffer_size)==0) {
+            buffer = calloc(f_b->ammount_of_character, f_b->buffer_size);
+            if(buffer) {
+                fread(buffer,1,length,file);
+            }
+        } else {
+            fprintf(stderr,"\nError matching memory size of file.\nTry again.\n\n");
+            fflush(stderr);
+            exit(EXIT_FAILURE);
         }
 
         fclose(file);
+        free(f_b);
     } else {
         fprintf(stderr, "\nUnknown file type: %s\n\n",extension);
         fflush(stderr);
