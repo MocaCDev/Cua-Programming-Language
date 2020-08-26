@@ -1,2 +1,2 @@
-language = 'c'
+    language = 'c'
 run = 'make main.c run'

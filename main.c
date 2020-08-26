@@ -24,8 +24,11 @@ int main(int argc, char* args[]) {
         tokens
     );
     parser* parser = init_parser(lexer);
+    parse(parser);
 
     void* b = (int*)10;
+
+    free(tokens);
 
     return 0;
 }

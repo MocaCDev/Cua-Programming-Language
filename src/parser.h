@@ -10,6 +10,7 @@ typedef struct PARSER_ {
 } parser;
 
 parser* init_parser(LEXER_* lexer);
+parser* parse(parser* parser);
 parser* local_variable_definition(parser* parser);
 
 #endif

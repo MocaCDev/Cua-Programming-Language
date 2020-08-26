@@ -9,6 +9,7 @@ typedef struct Lexer {
     unsigned int line;
     unsigned int is_local_variable; // this will be set to 0(true) if the "local" variable was found
     char current_char;
+    char* type_declaration;
     TOKEN_S* tokens;
 } LEXER_;
 

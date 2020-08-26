@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "lexer.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
 /*
@@ -29,7 +30,33 @@ static inline void parser_gather_next_token(parser* parser_, int token_id) {
     }
 }
 
+parser* parse(parser* parser) {
+    switch(parser->token->TOKEN_TYPE) {
+        case TOKEN_LOCAL: return local_variable_definition(parser);
+        default: break;
+    }
+    return parser;
+}
+
 parser* local_variable_definition(parser* parser_) {
+
+    if(strcmp(parser_->token->value, "local")==0) {
+        parser_gather_next_token(parser_, TOKEN_LOCAL);
+
+        get_variable_name(parser_->lexer);
+        
+        if(parser_->token->TOKEN_TYPE == TOKEN_TYPE_INT) {
+            parser_gather_next_token(parser_, TOKEN_TYPE_INT);
+
+
+            if(strlen(parser_->lexer->variable_name)>0) {
+                if(parser_->token->TOKEN_TYPE == TOKEN_EQUALS) {
+                    parser_gather_next_token(parser_,TOKEN_EQUALS);
+                    printf("%s",parser_->token->value);
+                }
+            }
+        }
+    }
 
     return parser_;
 }

@@ -31,6 +31,7 @@ char* read_file(const char* file_to_read) {
                 extension = realloc(extension,length_*sizeof(char*));
                 strcat(extension,value);
                 index++;
+                free(value);
             }
         }
     }
@@ -61,6 +62,7 @@ char* read_file(const char* file_to_read) {
 
         fclose(file);
         free(f_b);
+        free(extension);
     } else {
         fprintf(stderr, "\nUnknown file type: %s\n\n",extension);
         fflush(stderr);

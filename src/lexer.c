@@ -11,6 +11,7 @@ LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
 
     lexer->i = 0;
     lexer->contents = contents;
+    lexer->type_declaration = (char*) malloc(sizeof(lexer->type_declaration));
     lexer->line = 1;
     lexer->is_local_variable = 1; // 1 as in false. No local variable declaration found yet
 
@@ -27,9 +28,8 @@ static inline void gather_comment(LEXER_* lexer) {
     while(1) {
         advance(lexer);
 
-        if(lexer->current_char == '\n') {
-            return advance(lexer);
-        }
+        if(lexer->current_char == '\n') return advance(lexer);
+        if(lexer->current_char == '\0') return;
     }
 }
 
@@ -40,10 +40,10 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
         if(lexer->current_char == '-') {
             advance(lexer);
             if(lexer->current_char == '/') {
-                advance(lexer);
-                if(lexer->current_char == '\n') {
-                    return advance(lexer);
-                }
+                return advance(lexer);
+                //if(lexer->current_char == '\n') {
+                    //return advance(lexer);
+                //}
             } else {
                 fprintf(stderr,"\nWas expecting end of multi line comment on line %d\n\n",lexer->line);
                 fflush(stderr);
@@ -66,6 +66,7 @@ static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
 
         strcat(value,current);
         advance(lexer);
+        free(current);
     }
     
     /*
@@ -76,13 +77,16 @@ static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
     if(assign_to_variable_name == 1) lexer->tokens = init_token(TOKEN_ID, value);
 
     if(assign_to_variable_name==0) {
-        lexer->variable_name = value; 
+        lexer->variable_name = value;
         return lexer->variable_name;
     }
+
     return lexer;
 }
 
 void get_variable_name(LEXER_* lexer) {
+    skip_whitespace(lexer);
+
     lexer->variable_name = gather_string(lexer,0);
     lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
 }
@@ -97,21 +101,35 @@ TOKEN_S* next_token(LEXER_* lexer) {
             advance(lexer);
             if(lexer->current_char=='-') {
                 gather_comment(lexer);
+                continue;
             } else {
                 fprintf(stderr,"\nExpecting single line comment, '--', found '-'.\n\n");
                 fflush(stderr);
                 exit(EXIT_FAILURE);
             }
+            continue;
         }
         if(lexer->current_char == '/') {
             advance(lexer);
             if(lexer->current_char == '-') {
                 gather_multi_line_comment(lexer);
+                continue;
             } else {
                 fprintf(stderr, "\nWas expecting multi-line comment on line %d.\n\n",lexer->line);
                 fflush(stderr);
                 exit(EXIT_FAILURE);
             }
+            continue;
+        }
+
+        if(lexer->current_char == '\n') advance(lexer);
+
+        if(isdigit(lexer->current_char)) {
+            // ToDo: Pick up integer assignments
+            do {
+                printf("%c",lexer->current_char);
+                advance(lexer);
+            } while(isdigit(lexer->current_char));
         }
         
         if(isalnum(lexer->current_char)) {
@@ -122,13 +140,16 @@ TOKEN_S* next_token(LEXER_* lexer) {
             lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
             lexer->is_local_variable = 0;
 
-            advance(lexer);
+            // advance(lexer);
+
             return lexer->tokens;
         }
         if(strcmp(lexer->tokens->value,"int")==0) {
             lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
 
-            advance(lexer);
+            memcpy(lexer->type_declaration,lexer->tokens->value,strlen(lexer->tokens->value)+1); // setting type_declaration to "int"
+
+            // advance(lexer);
             /*
             // Should be variable name..
             get_variable_name(lexer);
@@ -138,6 +159,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
         
         switch(lexer->current_char) {
             case '=': return advance_with_token(lexer,init_token(TOKEN_EQUALS,get_char_as_string(lexer)));
+            default: break;
         }
     }
 
@@ -171,16 +193,17 @@ void advance(LEXER_* lexer) {
 
 // Skips whitespace. Example, if we had "int   a   =   10;" all the whitespace would be skipped
 void skip_whitespace(LEXER_* lexer) {
-    static int i = 0;
-    if(lexer->current_char == ' ' || lexer->current_char == 10) {
+    int i = 0;
+    do {
         advance(lexer);
         i++;
-    }
-    if(i > 2) {
-        fprintf(stdout,"\n\033[1;35mWarning: Uneeded ammount of spaces on line %d\n\n\033[0m",lexer->line);
-        fflush(stdout);
-        i = 0;
-    }
+
+        if(i > 2) {
+            fprintf(stdout,"\n\033[1;35mWarning: Uneeded ammount of spaces on line %d\n\n\033[0m",lexer->line);
+            fflush(stdout);
+            i = 0;
+        }
+    } while(lexer->current_char == ' ' || lexer->current_char == 10);
 }
 
 // This 'tokenizes' the recently found token, using init_token. TOKEN_TYPE is then set to the token found in the switch statement in next_token

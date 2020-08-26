@@ -7,4 +7,4 @@
     With the keyword 'bit', you can then assign a boolean value.
     I will make it to where our runtime turns that 'boolean' into a true or false mechanism.
 -/
-local int my_age
+local int my_age = 10 -- ToDo: Assignment operations!
