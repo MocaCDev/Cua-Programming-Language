@@ -1,5 +1,6 @@
 #include "lexer.h"
 #include "tokens.h"
+#include "function_shortcuts.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +14,7 @@ LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
     lexer->contents = contents;
     lexer->type_declaration = (char*) malloc(sizeof(lexer->type_declaration));
     lexer->line = 1;
+    lexer->is_default = 1;
     lexer->is_local_variable = 1; // 1 as in false. No local variable declaration found yet
 
     // Setting up TOKEN_S struct in the lexer struct
@@ -33,9 +35,76 @@ static inline void gather_comment(LEXER_* lexer) {
     }
 }
 
+static inline TOKEN_S* check(LEXER_* lexer, char* value, char* is_value, int tokenize_as) {
+    if(strcmp(value,is_value)==0) {
+        lexer->tokens = init_token(tokenize_as,value);
+        return lexer->tokens;
+    } else {
+        lexer->tokens = init_token(TOKEN_ID,value);
+        return lexer->tokens;
+    }
+}
+
 static inline void gather_multi_line_comment(LEXER_* lexer) {
     while(1) {
         advance(lexer);
+
+        if(lexer->current_char == '[') {
+            advance(lexer);
+
+            if(isalnum(lexer->current_char)) {
+                gather_id(lexer);
+                
+                if(strcmp(lexer->tokens->value,"INLINECODE")==0) {
+
+                    if(lexer->current_char==']') advance(lexer);
+                    else {
+                        fprintf(stderr,"\nError: Missing closing ']' on line %d\n\n",lexer->line);
+                        fflush(stderr);
+                        exit(EXIT_FAILURE);
+                    }
+
+                    if(lexer->current_char=='{') {
+                        advance(lexer);
+
+                        if(lexer->current_char=='\n') advance(lexer);
+
+                        lexer->is_default = 0;
+                        skip_whitespace(lexer);
+
+                        if(lexer->current_char == '}') {
+                            advance(lexer);
+                            if(lexer->current_char=='[') {
+                                advance(lexer);
+
+                                if(isalnum(lexer->current_char)) gather_id(lexer);
+
+                                if(strcmp(lexer->tokens->value,"END")==0) {
+                                    if(lexer->current_char == ']') advance(lexer);
+                                    else {
+                                        RAISE_ERROR("\nMissing closing ']' to inline-comment-block-code closing statement\n\n",1);
+                                    }
+                                } else {
+                                    RAISE_ERROR("\nMissing 'END' to closing statement of the inline-comment-block-code\n\n",1);
+                                }
+                            }
+                        }
+                        else {
+                            RAISE_ERROR("\nMissing closing '}' to inline-comment-block-code\n\n",1);
+                        }
+                    }
+                }
+            }
+            /*
+            if(lexer->current_char == ']') {
+                    advance(lexer);
+            } else {
+                fprintf(stderr,"\nMissing closing ']' to inline-comment-block-code\n\n");
+                fflush(stderr);
+                exit(EXIT_FAILURE);
+            }*/
+            continue;
+        }
         
         if(lexer->current_char == '-') {
             advance(lexer);
@@ -45,9 +114,7 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
                     //return advance(lexer);
                 //}
             } else {
-                fprintf(stderr,"\nWas expecting end of multi line comment on line %d\n\n",lexer->line);
-                fflush(stderr);
-                exit(EXIT_FAILURE);
+                RAISE_ERROR("\nWas expecting end of multi line comment on line %d\n\n",1,lexer->line);
             }
         }
     }
@@ -103,9 +170,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
                 gather_comment(lexer);
                 continue;
             } else {
-                fprintf(stderr,"\nExpecting single line comment, '--', found '-'.\n\n");
-                fflush(stderr);
-                exit(EXIT_FAILURE);
+                RAISE_ERROR("\nExpecting single line comment, '--', found '-'.\n\n",1);
             }
             continue;
         }
@@ -115,9 +180,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
                 gather_multi_line_comment(lexer);
                 continue;
             } else {
-                fprintf(stderr, "\nWas expecting multi-line comment on line %d.\n\n",lexer->line);
-                fflush(stderr);
-                exit(EXIT_FAILURE);
+                RAISE_ERROR("\nWas expecting multi-line comment on line %d.\n\n",1,lexer->line);
             }
             continue;
         }
@@ -198,7 +261,7 @@ void skip_whitespace(LEXER_* lexer) {
         advance(lexer);
         i++;
 
-        if(i > 2) {
+        if(i > 2 && lexer->is_default == 1) {
             fprintf(stdout,"\n\033[1;35mWarning: Uneeded ammount of spaces on line %d\n\n\033[0m",lexer->line);
             fflush(stdout);
             i = 0;

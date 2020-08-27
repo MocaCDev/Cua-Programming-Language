@@ -6,5 +6,9 @@
     In CUA, I want to add a keyword 'bit' for low level working with bits.
     With the keyword 'bit', you can then assign a boolean value.
     I will make it to where our runtime turns that 'boolean' into a true or false mechanism.
+    
+    [INLINE_CODE]{
+        
+    }[END]
 -/
 local int my_age = 10 -- ToDo: Assignment operations!
