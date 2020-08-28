@@ -272,7 +272,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
             lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
             lexer->is_local_variable = 0;
 
-            // advance(lexer);
+            //advance(lexer);
 
             return lexer->tokens;
         }
@@ -283,7 +283,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
 
             memcpy(lexer->type_declaration,lexer->tokens->value,strlen(lexer->tokens->value)+1); // setting type_declaration to "int"
 
-            // advance(lexer);
+            //advance(lexer);
             /*
             // Should be variable name..
             get_variable_name(lexer);

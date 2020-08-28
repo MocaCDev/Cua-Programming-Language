@@ -26,9 +26,9 @@ int main(int argc, char* args[]) {
     parser* parser = init_parser(lexer);
     parse(parser);
 
-    void* b = (int*)10;
+    //void* b = (int*)10;
 
-    free(tokens);
+    //free(tokens);
 
     return 0;
 }

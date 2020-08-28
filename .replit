@@ -1,2 +1,9 @@
+#
+#
+#
+# SEE parser.c!!! I LEFT A COMMENT FOR YOU TO READ
+#
+#
+#
 language = 'c'
 run = 'make main.c run'
