@@ -19,7 +19,7 @@ parser* init_parser(LEXER_* lexer) {
 }
 
 // Gathers the next token for the parser
-static inline void parser_gather_next_token(parser* parser_, int token_id) {
+static inline parser* parser_gather_next_token(parser* parser_, int token_id) {
     if(parser_->token->TOKEN_TYPE == token_id) {
         parser_->last_token = parser_->token;
         parser_->token = next_token(parser_->lexer);
@@ -28,6 +28,7 @@ static inline void parser_gather_next_token(parser* parser_, int token_id) {
         fflush(stderr);
         exit(EXIT_FAILURE);
     }
+    return parser_;
 }
 
 parser* parse(parser* parser) {
@@ -41,20 +42,23 @@ parser* parse(parser* parser) {
 parser* local_variable_definition(parser* parser_) {
 
     if(strcmp(parser_->token->value, "local")==0) {
-        parser_gather_next_token(parser_, TOKEN_LOCAL);
+        parser_ = parser_gather_next_token(parser_, TOKEN_LOCAL);
 
         get_variable_name(parser_->lexer);
         printf("%s",parser_->lexer->variable_name);
 
-        if(parser_->token->TOKEN_TYPE == TOKEN_TYPE_INT) {
+        if(strcmp(parser_->token->value,"int")==0) {
             parser_gather_next_token(parser_, TOKEN_TYPE_INT);
 
 
             if(strlen(parser_->lexer->variable_name)>0) {
                 if(parser_->token->TOKEN_TYPE == TOKEN_EQUALS) {
                     parser_gather_next_token(parser_,TOKEN_EQUALS);
+                    parser_gather_next_token(parser_, TOKEN_INT_ASSIGNMENT);
                 }
             }
+            parser_->lexer->is_int = 1;
+            if(parser_->token->TOKEN_TYPE == TOKEN_SEMI) parser_gather_next_token(parser_, TOKEN_SEMI);
         }
     }
 

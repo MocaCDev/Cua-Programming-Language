@@ -125,7 +125,7 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
 static inline void* gather_ids(LEXER_* lexer,int assign_to_variable_name) {
     char* value = calloc(1,sizeof(char));
 
-    while(1) {
+    while(isalnum(lexer->current_char)) {
         char* current = get_char_as_string(lexer);
 
         value = realloc(
@@ -176,10 +176,25 @@ static inline void gather_string(LEXER_* lexer) {
     } while(1);
 }
 
+static inline void* gather_var_name(LEXER_* lexer) {
+    char* var_name = calloc(1,sizeof(char));
+
+    while(1) {
+        var_name = realloc(
+            var_name,
+            strlen(get_char_as_string(lexer))*sizeof(char*)
+        );
+        strcat(var_name,get_char_as_string(lexer));
+        advance(lexer);
+        if(lexer->current_char == ' ') break;
+    }
+    return var_name;
+}
+
 void get_variable_name(LEXER_* lexer) {
     skip_whitespace(lexer);
 
-    lexer->variable_name = gather_ids(lexer,0);
+    lexer->variable_name = gather_var_name(lexer);
     lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
 }
 
@@ -283,6 +298,7 @@ TOKEN_S* next_token(LEXER_* lexer) {
         
         switch(lexer->current_char) {
             case '=': return advance_with_token(lexer,init_token(TOKEN_EQUALS,get_char_as_string(lexer)));
+            case ';': return advance_with_token(lexer, init_token(TOKEN_SEMI,get_char_as_string(lexer)));
             default: break;
         }
     }

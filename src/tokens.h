@@ -7,6 +7,7 @@ typedef struct TOKENS {
         TOKEN_TYPE_INT,
         TOKEN_LOCAL,
         TOKEN_EQUALS,
+        TOKEN_SEMI,
         TOKEN_EOF, // END OF FILE has been reached when this is the current token
         TOKEN_LPAREN,
         TOKEN_RPAREN,
