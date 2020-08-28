@@ -44,7 +44,8 @@ parser* local_variable_definition(parser* parser_) {
         parser_gather_next_token(parser_, TOKEN_LOCAL);
 
         get_variable_name(parser_->lexer);
-        
+        printf("%s",parser_->lexer->variable_name);
+
         if(parser_->token->TOKEN_TYPE == TOKEN_TYPE_INT) {
             parser_gather_next_token(parser_, TOKEN_TYPE_INT);
 

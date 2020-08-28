@@ -125,7 +125,7 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
 static inline void* gather_ids(LEXER_* lexer,int assign_to_variable_name) {
     char* value = calloc(1,sizeof(char));
 
-    while(isalnum(lexer->current_char)) {
+    while(1) {
         char* current = get_char_as_string(lexer);
 
         value = realloc(
@@ -135,6 +135,7 @@ static inline void* gather_ids(LEXER_* lexer,int assign_to_variable_name) {
 
         strcat(value,current);
         advance(lexer);
+        if(lexer->current_char == ' ') break;
         free(current);
     }
     
@@ -299,18 +300,6 @@ void advance(LEXER_* lexer) {
 
         if(lexer->current_char == '\n')
             lexer->line++;
-        
-        /*
-            For some reason, '_' will cut off variable name.
-            So, to merge the varibale name together, we will just emediately get the next character that follows '_'
-            so we don't run into errors.
-            So, if we had:
-                local int my_age;
-            my_age will then be: myage because the '_' indicates we want to merge
-        */
-        if(lexer->current_char == '_') {
-            advance(lexer);
-        }
     }
 }
 
