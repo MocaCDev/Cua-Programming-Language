@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "lexer.h"
+#include "tree.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -44,15 +45,15 @@ static inline parser* parser_gather_next_token(parser* parser_, int token_id) {
     return parser_;
 }
 
-parser* parse(parser* parser) {
+SYN_TREE_* parse(parser* parser) {
     switch(parser->token->TOKEN_TYPE) {
         case TOKEN_LOCAL: return local_variable_definition(parser);
         default: break;
     }
-    return parser;
+    return init_syntax_tree(ST_EOF);
 }
 
-parser* local_variable_definition(parser* parser_) {
+SYN_TREE_* local_variable_definition(parser* parser_) {
 
     if(parser_->token->TOKEN_TYPE == TOKEN_LOCAL) {
         parser_ = parser_gather_next_token(parser_, TOKEN_LOCAL);
@@ -79,6 +80,8 @@ parser* local_variable_definition(parser* parser_) {
         }
     }
 
+    // ToDo: Setup some ast ideals right here for local variables definition
+
     if(!(parser_->token->TOKEN_TYPE == TOKEN_EOF)) return parse(parser_);
-    else return parser_;
+    else return init_syntax_tree(ST_LOCAL);
 }

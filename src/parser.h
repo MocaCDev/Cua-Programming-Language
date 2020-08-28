@@ -2,6 +2,7 @@
 #define PARSER
 #include "tokens.h"
 #include "lexer.h"
+#include "tree.h"
 
 typedef struct PARSER_ {
     LEXER_* lexer;
@@ -12,7 +13,7 @@ typedef struct PARSER_ {
 } parser;
 
 parser* init_parser(LEXER_* lexer);
-parser* parse(parser* parser);
-parser* local_variable_definition(parser* parser);
+SYN_TREE_* parse(parser* parser);
+SYN_TREE_* local_variable_definition(parser* parser);
 
 #endif

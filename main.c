@@ -4,6 +4,8 @@
 #include "src/lexer.h"
 #include "src/tokens.h"
 #include "src/file_reader.h"
+#include "src/tree.h"
+#include "src/runtime.h"
 
 // RUN COMMAND: ./main.o examples/example.cua
 // CUA's programming language source code can now be found on GitHub. Let me know if you need me to publish it on another website!
@@ -24,7 +26,8 @@ int main(int argc, char* args[]) {
         tokens
     );
     parser* parser = init_parser(lexer);
-    parse(parser);
+    SYN_TREE_* syn_tree = parse(parser);
+    _RUNTIME_* runtime = init_runtime(lexer, parser);
 
     //void* b = (int*)10;
 
