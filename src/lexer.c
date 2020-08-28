@@ -122,7 +122,7 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
     }
 }
 
-static inline void* gather_ids(LEXER_* lexer,int assign_to_variable_name) {
+static inline void* gather_ids(LEXER_* lexer) {
     char* value = calloc(1,sizeof(char));
 
     while(isalnum(lexer->current_char)) {
@@ -144,12 +144,7 @@ static inline void* gather_ids(LEXER_* lexer,int assign_to_variable_name) {
         This function, gather_id, will get the keyword, and we will then store it in the lexer struct
         so that we can then tokenize them!
     */
-    if(assign_to_variable_name == 1) lexer->tokens = init_token(TOKEN_ID, value);
-
-    if(assign_to_variable_name==0) {
-        lexer->variable_name = value;
-        return lexer->variable_name;
-    }
+    lexer->tokens = init_token(TOKEN_ID, value);
 
     return lexer;
 }
@@ -364,7 +359,7 @@ TOKEN_S* gather_id(LEXER_* lexer) {
     */
     //lexer->tokens = init_token(TOKEN_ID, value);
 
-    gather_ids(lexer,1);
+    gather_ids(lexer);
 
     return lexer->tokens;
 }
