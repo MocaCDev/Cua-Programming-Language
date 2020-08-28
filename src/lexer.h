@@ -11,6 +11,8 @@ typedef struct Lexer {
     char current_char;
     char* type_declaration;
     int is_default;
+    int is_int;
+    int is_string;
     TOKEN_S* tokens;
 } LEXER_;
 

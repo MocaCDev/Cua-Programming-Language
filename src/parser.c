@@ -52,7 +52,6 @@ parser* local_variable_definition(parser* parser_) {
             if(strlen(parser_->lexer->variable_name)>0) {
                 if(parser_->token->TOKEN_TYPE == TOKEN_EQUALS) {
                     parser_gather_next_token(parser_,TOKEN_EQUALS);
-                    printf("%s",parser_->token->value);
                 }
             }
         }

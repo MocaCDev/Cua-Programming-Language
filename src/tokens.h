@@ -7,7 +7,12 @@ typedef struct TOKENS {
         TOKEN_TYPE_INT,
         TOKEN_LOCAL,
         TOKEN_EQUALS,
-        TOKEN_EOF // END OF FILE has been reached when this is the current token
+        TOKEN_EOF, // END OF FILE has been reached when this is the current token
+        TOKEN_LPAREN,
+        TOKEN_RPAREN,
+        TOKEN_STRING,
+        TOKEN_INT_ASSIGNMENT,
+        TOKEN_STRING_ASSIGNMENT
     } TOKEN_TYPE; // a enum is ideals that have a number assigned to it. starts at zero by default
     char* value;
 } TOKEN_S; // since this is 'typedef struct', all we do is: TOKENS tokens;

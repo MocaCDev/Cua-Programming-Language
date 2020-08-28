@@ -15,6 +15,8 @@ LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
     lexer->type_declaration = (char*) malloc(sizeof(lexer->type_declaration));
     lexer->line = 1;
     lexer->is_default = 1;
+    lexer->is_int = 1;
+    lexer->is_string = 1;
     lexer->is_local_variable = 1; // 1 as in false. No local variable declaration found yet
 
     // Setting up TOKEN_S struct in the lexer struct
@@ -120,7 +122,7 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
     }
 }
 
-static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
+static inline void* gather_ids(LEXER_* lexer,int assign_to_variable_name) {
     char* value = calloc(1,sizeof(char));
 
     while(isalnum(lexer->current_char)) {
@@ -151,11 +153,51 @@ static inline void* gather_string(LEXER_* lexer,int assign_to_variable_name) {
     return lexer;
 }
 
+/* This function is slightly different than gather_ids */
+static inline void gather_string(LEXER_* lexer) {
+    char* string_value = calloc(1,sizeof(char));
+
+    do {
+
+        char* curr = get_char_as_string(lexer);
+
+        string_value = realloc(
+            string_value,
+            strlen(curr)*sizeof(char*)
+        );
+        strcat(string_value,curr);
+
+        advance(lexer);
+        if(lexer->current_char == '"') {
+            lexer->tokens = init_token(TOKEN_STRING_ASSIGNMENT,string_value);
+            return advance(lexer);
+        }
+    } while(1);
+}
+
 void get_variable_name(LEXER_* lexer) {
     skip_whitespace(lexer);
 
-    lexer->variable_name = gather_string(lexer,0);
+    lexer->variable_name = gather_ids(lexer,0);
     lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
+}
+
+static inline int gather_int_assignment(LEXER_* lexer) {
+    char* val = calloc(1,sizeof(char));
+    
+    do {
+        char* cur = get_char_as_string(lexer);
+
+        val = realloc(
+            val,
+            strlen(cur)*sizeof(char*)
+        );
+        strcat(val,cur);
+
+        advance(lexer);
+    } while(isdigit(lexer->current_char));
+
+    return atoi(val);
 }
 
 // Gets the next ideal 'token'. This is dependable upon the switch statement(could be a character, could be multiple characters, could be a symbol etc). This is used heavily in parser.c
@@ -186,13 +228,29 @@ TOKEN_S* next_token(LEXER_* lexer) {
         }
 
         if(lexer->current_char == '\n') advance(lexer);
+        if(lexer->current_char == '"') {
+            if(lexer->is_int == 1) /*This will get more advanced when we introduce string, char, bit, float and double*/ {
+                advance(lexer);
+
+                if(!(lexer->current_char == '"')) gather_string(lexer);
+                else RAISE_ERROR("\nExpecting string got NULL instead",-1);
+
+                return lexer->tokens;
+            } else RAISE_ERROR("\nCannot have string assignment for integer type(line %d)\n\n", -1, lexer->line);
+        }
 
         if(isdigit(lexer->current_char)) {
             // ToDo: Pick up integer assignments
-            do {
+            /*do {
                 printf("%c",lexer->current_char);
                 advance(lexer);
-            } while(isdigit(lexer->current_char));
+            } while(isdigit(lexer->current_char));*/
+            int a = gather_int_assignment(lexer);
+            char* number = (char*) malloc(sizeof(char*));
+            sprintf(number, "%d", a);
+            lexer->tokens = init_token(TOKEN_INT_ASSIGNMENT, number);
+
+            return lexer->tokens;
         }
         
         if(isalnum(lexer->current_char)) {
@@ -209,6 +267,8 @@ TOKEN_S* next_token(LEXER_* lexer) {
         }
         if(strcmp(lexer->tokens->value,"int")==0) {
             lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
+
+            lexer->is_int = 0;
 
             memcpy(lexer->type_declaration,lexer->tokens->value,strlen(lexer->tokens->value)+1); // setting type_declaration to "int"
 
@@ -299,7 +359,7 @@ TOKEN_S* gather_id(LEXER_* lexer) {
     */
     //lexer->tokens = init_token(TOKEN_ID, value);
 
-    gather_string(lexer,1);
+    gather_ids(lexer,1);
 
     return lexer->tokens;
 }
