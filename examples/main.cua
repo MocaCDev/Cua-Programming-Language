@@ -1,0 +1,21 @@
+local int age;
+/-
+    The above is a "pre variable declaration". Which is basically a variable declaration with no value assigned.
+    I want to add in a feature to the language to do this by default and allocate memory accordingly.
+
+    The feature would probably be as follows:
+
+    PreStruct{
+        Type: int -> age, // or you can do: Type: int = age
+        Type: string -> name,
+        Type: string -> data
+    };
+
+    The "PreStruct" keyword that CUA will have will be like the C struct keyword, only for Cuas case it will be for "pre-defining" varaible declarations.
+
+    PreStruct will be a easier way to just group all "pre-defined" variables the project file will be using
+    and defaulty allocate low amounts of dynamic memory.
+
+    Look at the feature keyword "PreStruct" like so:
+        PreStruct is a group of pre-defined variables that have strict memory allocations to prevent memory leaks
+-/

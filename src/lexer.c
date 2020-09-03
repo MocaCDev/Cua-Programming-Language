@@ -1,10 +1,6 @@
 #include "lexer.h"
 #include "tokens.h"
 #include "function_shortcuts.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 // sets up LEXER_ struct
 LEXER_* init_lexer(char* contents, TOKEN_S* tokens) {
@@ -115,9 +111,9 @@ static inline void gather_multi_line_comment(LEXER_* lexer) {
                 //if(lexer->current_char == '\n') {
                     //return advance(lexer);
                 //}
-            } else {
+            }/* else {
                 RAISE_ERROR("\nWas expecting end of multi line comment on line %d\n\n",1,lexer->line);
-            }
+            }*/
         }
     }
 }
@@ -171,8 +167,9 @@ static inline void gather_string(LEXER_* lexer) {
     } while(1);
 }
 
-static inline void* gather_var_name(LEXER_* lexer) {
+/*static inline void* gather_var_name(LEXER_* lexer) {
     char* var_name = calloc(1,sizeof(char));
+    skip_whitespace(lexer);
 
     while(1) {
         var_name = realloc(
@@ -181,17 +178,17 @@ static inline void* gather_var_name(LEXER_* lexer) {
         );
         strcat(var_name,get_char_as_string(lexer));
         advance(lexer);
-        if(lexer->current_char == ' ') break;
+        if(lexer->current_char == ' ' || lexer->current_char == ';') break;
     }
     return var_name;
-}
+}*/
 
-void get_variable_name(LEXER_* lexer) {
-    skip_whitespace(lexer);
+/*void get_variable_name(LEXER_* lexer) {
+    printf("HERE");
 
     lexer->variable_name = gather_var_name(lexer);
-    lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
-}
+    //lexer->tokens = init_token(TOKEN_ID,lexer->variable_name);
+}*/
 
 static inline int gather_int_assignment(LEXER_* lexer) {
     char* val = calloc(1,sizeof(char));
@@ -266,28 +263,29 @@ TOKEN_S* next_token(LEXER_* lexer) {
         
         if(isalnum(lexer->current_char)) {
             gather_id(lexer);
-        }
+            if(strcmp(lexer->tokens->value,"local")==0) {
+                lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
+                lexer->is_local_variable = 0;
 
-        if(strcmp(lexer->tokens->value,"local")==0) {
-            lexer->tokens = init_token(TOKEN_LOCAL,lexer->tokens->value);
-            lexer->is_local_variable = 0;
+                //advance(lexer);
 
-            //advance(lexer);
+                return lexer->tokens;
+            }
+            else if(strcmp(lexer->tokens->value,"int")==0) {
+                lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
 
-            return lexer->tokens;
-        }
-        if(strcmp(lexer->tokens->value,"int")==0) {
-            lexer->tokens = init_token(TOKEN_TYPE_INT,lexer->tokens->value);
+                lexer->is_int = 0;
 
-            lexer->is_int = 0;
+                memcpy(lexer->type_declaration,lexer->tokens->value,strlen(lexer->tokens->value)+1); // setting type_declaration to "int"
 
-            memcpy(lexer->type_declaration,lexer->tokens->value,strlen(lexer->tokens->value)+1); // setting type_declaration to "int"
-
-            //advance(lexer);
-            /*
-            // Should be variable name..
-            get_variable_name(lexer);
-            */
+                //advance(lexer);
+                /*
+                // Should be variable name..
+                get_variable_name(lexer);
+                */
+                return lexer->tokens;
+            }
+            lexer->tokens = init_token(TOKEN_ID, lexer->tokens->value);
             return lexer->tokens;
         }
         

@@ -1,5 +1,4 @@
 #include "tree.h"
-#include <stdlib.h>
 
 SYN_TREE_* init_syntax_tree(int SYNT_TREE_TYPE) {
     SYN_TREE_* syntax_tree = calloc(1,sizeof(*syntax_tree));

@@ -1,5 +1,6 @@
 #ifndef SYNTAX_TREE
 #define SYNTAX_TREE
+#include <stdlib.h>
 
 typedef struct SYN_TREE {
     enum {

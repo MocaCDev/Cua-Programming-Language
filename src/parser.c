@@ -1,9 +1,7 @@
 #include "parser.h"
 #include "lexer.h"
 #include "tree.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include "function_shortcuts.h"
 
 /*
     The parser basically just sets up the syntax of the language.
@@ -48,6 +46,9 @@ static inline parser* parser_gather_next_token(parser* parser_, int token_id) {
 SYN_TREE_* parse(parser* parser) {
     switch(parser->token->TOKEN_TYPE) {
         case TOKEN_LOCAL: return local_variable_definition(parser);
+        case TOKEN_ID: {
+            RAISE_ERROR("\nInvalid syntax for Cua file.\n\n", -1);
+        }
         default: break;
     }
     return init_syntax_tree(ST_EOF);
@@ -58,13 +59,15 @@ SYN_TREE_* local_variable_definition(parser* parser_) {
     if(parser_->token->TOKEN_TYPE == TOKEN_LOCAL) {
         parser_ = parser_gather_next_token(parser_, TOKEN_LOCAL);
 
-        get_variable_name(parser_->lexer);
-
         if(strcmp(parser_->token->value,"int")==0) {
             parser_gather_next_token(parser_, TOKEN_TYPE_INT);
 
+            // get_variable_name(parser_->lexer); ~ This function may not be needed
 
-            if(strlen(parser_->lexer->variable_name)>0) {
+            if(strlen(parser_->token->value)>0) {
+                parser_->lexer->variable_name = parser_->token->value;
+                parser_gather_next_token(parser_, TOKEN_ID);
+
                 if(parser_->token->TOKEN_TYPE == TOKEN_EQUALS) {
                     parser_gather_next_token(parser_,TOKEN_EQUALS);
 
@@ -72,16 +75,24 @@ SYN_TREE_* local_variable_definition(parser* parser_) {
                     printf("%s=%s\n",parser_->lexer->variable_name,parser_->token->value);
 
                     parser_gather_next_token(parser_, TOKEN_INT_ASSIGNMENT);
+
+                    goto end;
+                }
+                if(parser_->token->TOKEN_TYPE == TOKEN_SEMI) {
+                    printf("\nPre-Local-Variable-Declaration: %s\n\n",parser_->lexer->variable_name);
+                    parser_gather_next_token(parser_, TOKEN_SEMI);
                 }
             }
+            end:
             parser_->lexer->is_int = 1;
             if(parser_->token->TOKEN_TYPE == TOKEN_SEMI) parser_gather_next_token(parser_, TOKEN_SEMI);
             
         }
+
     }
 
     // ToDo: Setup some ast ideals right here for local variables definition
 
-    if(!(parser_->token->TOKEN_TYPE == TOKEN_EOF)) return parse(parser_);
-    else return init_syntax_tree(ST_LOCAL);
+    //if(!(parser_->token->TOKEN_TYPE == TOKEN_EOF)) return parse(parser_);
+    //else return init_syntax_tree(ST_LOCAL);
 }

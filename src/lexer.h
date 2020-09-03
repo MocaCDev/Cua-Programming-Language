@@ -1,6 +1,10 @@
 #ifndef LEXER
 #define LEXER
 #include "tokens.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 typedef struct Lexer {
     char* contents;
@@ -32,6 +36,6 @@ void skip_whitespace(LEXER_* lexer);
 
 char* get_char_as_string(LEXER_* lexer);
 
-void get_variable_name(LEXER_* lexer);
+//void get_variable_name(LEXER_* lexer);
 
 #endif

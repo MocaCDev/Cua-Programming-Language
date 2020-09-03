@@ -3,7 +3,13 @@
 #
 # SEE parser.c!!! I LEFT A COMMENT FOR YOU TO READ
 #
+# I wrote a Python automation for my language Jang to pick up all
+# .jang file extensions. Should we do that in this language as well?
+# The Python automation is to find the 'main' file.
+# Do we want CUA to have a specific 'main' file, or are we going to create
+# Some type of way to indicate that a specific file is the 'main' file?
 #
+#it should have a main file
 #
 language = 'c'
-run = 'make main.c run'
+run = 'make Cua'

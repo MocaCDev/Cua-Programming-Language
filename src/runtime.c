@@ -1,7 +1,6 @@
 #include "runtime.h"
 #include "lexer.h"
 #include "parser.h"
-#include <stdlib.h>
 
 _RUNTIME_* init_runtime(LEXER_* lexer, parser* parser_) {
     _RUNTIME_* runtime = calloc(1,sizeof(*runtime));

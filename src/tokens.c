@@ -1,6 +1,4 @@
 #include "tokens.h"
-#include <stdlib.h>
-#include <string.h>
 
 const char* LOCAL_KEYWORD = "local";
 

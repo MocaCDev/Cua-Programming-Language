@@ -1,5 +1,7 @@
 #ifndef TOKEN // macro checker ifndef checks if the macro name TOKEN is not defined: ifndef = if not defined
 #define TOKEN // This is just so that we don't run into errors for including this header file in multiple other files!
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct TOKENS {
     enum {

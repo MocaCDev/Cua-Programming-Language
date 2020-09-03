@@ -1,7 +1,19 @@
-.PHONY: main.c
+compiler_run = gcc -Wall -o main.cua.o main.c
+C_SRC = $(wildcard src/*.c)
+H_SRC = $(wildcard src/*.h)
+CHECK_MEMORY = valgrind ./main.cua.o
 
-main.c:
-	gcc -Wall -o main.o main.c src/lexer.c src/parser.c src/file_reader.c src/runtime.c src/tokens.c src/function_shortcuts.h src/tree.c
+.PHONY: Cua
+.PHONY: clean
+.PHONY: memory_check
 
-run: main.c src/lexer.c src/parser.c src/file_reader.c src/runtime.c src/tokens.c src/function_shortcuts.h src/tree.c
-	./main.o
+CuaFile=n
+
+Cua: ${C_SRC} ${H_SRC}
+	${compiler_run} ${C_SRC} ${H_SRC}
+
+memory_check: ${C_SRC}
+	${CHECK_MEMORY} ${CuaFile}
+
+clean: ${C_SRC} ${H_SRC}
+	rm *.o
